@@ -368,13 +368,15 @@
 
 import * as React from 'react';
 import * as RechartsPrimitive from 'recharts';
-import { TooltipProps, TooltipPayload } from 'recharts';
+import { TooltipProps } from 'recharts';
 import { cn } from '@/lib/utils';
+import { Payload } from 'recharts/types/component/DefaultLegendContent';
 
 // ... (keep your existing imports and constants)
 
-type CustomTooltipPayload = TooltipPayload<number, string> & {
+type CustomTooltipPayload = Payload & {
   payload?: Record<string, unknown>;
+  name?: string;
 };
 
 interface CustomTooltipProps extends TooltipProps<number, string> {
@@ -385,6 +387,7 @@ interface CustomTooltipProps extends TooltipProps<number, string> {
   nameKey?: string;
   labelKey?: string;
   labelClassName?: string;
+  color?: string;
 }
 
 const ChartTooltipContent = React.forwardRef<HTMLDivElement, CustomTooltipProps>(
@@ -411,7 +414,7 @@ const ChartTooltipContent = React.forwardRef<HTMLDivElement, CustomTooltipProps>
       if (hideLabel || !payload?.length) return null;
 
       const [item] = payload as CustomTooltipPayload[];
-      const key = `${labelKey || item.dataKey || item.name || 'value'}`;
+      const key = `${labelKey || item.payload?.dataKey || item.name || 'value'}`;
       const itemConfig = getPayloadConfigFromPayload(config, item, key);
       const value =
         !labelKey && typeof label === 'string'
@@ -432,14 +435,14 @@ const ChartTooltipContent = React.forwardRef<HTMLDivElement, CustomTooltipProps>
     if (!active || !payload || payload.length === 0) return null;
 
     const validPayload = payload.filter(
-      (item): item is CustomTooltipPayload => item !== undefined && item !== null
+      (item) => item !== undefined && item !== null
     );
 
     if (validPayload.length === 0) return null;
 
     const nestLabel = validPayload.length === 1 && indicator !== 'dot';
 
-   return (
+    return (
       <div
         ref={ref}
         className={cn(
@@ -516,7 +519,12 @@ const ChartTooltipContent = React.forwardRef<HTMLDivElement, CustomTooltipProps>
     );
   }
 );
+
 function getPayloadConfigFromPayload(config: any, item: any, key: string) {
-  throw new Error('Function not implemented.');
+  // Implement your configuration lookup logic here
+  return config[key];
 }
 
+function useChart(): { config: any; } {
+  throw new Error('Function not implemented.');
+}
